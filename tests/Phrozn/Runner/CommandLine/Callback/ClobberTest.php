@@ -90,7 +90,7 @@ class ClobberTest
 
         $out->assertInLogs('Purging project data');
         $out->assertInLogs("Located project folder: {$path}/.phrozn");
-        $out->assertInLogs("[DELETED]  {$path}/.phrozn");
+        $out->assertInLogs("[DELETED]  Remove project folder: {$path}/.phrozn");
 
 
         $this->assertFalse(is_dir($path . '/.phrozn'));
@@ -146,7 +146,7 @@ class ClobberTest
 
         $out->assertInLogs('Purging project data');
         $out->assertInLogs("Located project folder: {$path}/.phrozn");
-        $out->assertInLogs("[DELETED]  {$path}/.phrozn");
+        $out->assertInLogs("[DELETED]  Remove project folder: {$path}/.phrozn");
 
         $this->assertFalse(is_dir($path . '/.phrozn'));
         $this->assertFalse(is_readable($path . '/.phrozn/config.yml'));
@@ -174,7 +174,7 @@ class ClobberTest
 
         $out->assertInLogs('Purging project data');
         $out->assertInLogs("Located project folder: {$path}/.phrozn");
-        $out->assertInLogs("[DELETED]  {$path}/.phrozn");
+        $out->assertInLogs("[DELETED]  Remove project folder: {$path}/.phrozn");
 
         $this->assertFalse(is_dir($path . '/.phrozn'));
         $this->assertFalse(is_readable($path . '/.phrozn/config.yml'));

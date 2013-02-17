@@ -23,7 +23,8 @@ namespace Phrozn\Runner\CommandLine\Callback;
 use Phrozn\Outputter\Console\Color,
     Symfony\Component\Yaml\Yaml,
     Phrozn\Runner\CommandLine,
-    Phrozn\Site\PieceOfSite as Site;
+    Phrozn\Site\PieceOfSite as Site,
+    Phrozn\Outputter;
 
 /**
  * phrozn up command
@@ -46,8 +47,8 @@ class Single
         try {
             $this->updateFile();
         } catch (\Exception $e) {
-            $this->out(self::STATUS_FAIL . $e->getMessage());
-            $this->out($this->getFooter());
+            $this->getOutputter()->stdout($e->getMessage(), self::STATUS_FAIL);
+            $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
         }
     }
 
@@ -56,34 +57,31 @@ class Single
         list($file, $in, $out) = $this->getPaths();
 
         ob_start();
-        $this->out($this->getHeader());
-        $this->out("Starting static file compilation.\n");
+        $this->getOutputter()->stdout($this->getHeader(), Outputter::STATUS_CLEAR);
+        $this->getOutputter()->stdout("Starting static file compilation.", Outputter::STATUS_CLEAR);
 
         $proceed = true;
         if (!is_dir($in)) {
-            $this->out(
-                self::STATUS_FAIL . "Source directory '{$in}' not found.");
+            $this->getOutputter()->stdout("Source directory '{$in}' not found.", Outputter::STATUS_FAIL);
             $proceed = false;
         } else {
-            $this->out(self::STATUS_OK . "Source directory located: {$in}");
+            $this->getOutputter()->stdout("Source directory located: {$in}");
         }
         if (!is_dir($out)) {
-            $this->out(
-                self::STATUS_FAIL . "Destination directory '{$out}' not found.");
+            $this->getOutputter()->stdout("Destination directory '{$out}' not found.", Outputter::STATUS_FAIL);
             $proceed = false;
         } else {
-            $this->out(self::STATUS_OK . "Destination directory located: {$out}");
+            $this->getOutputter()->stdout("Destination directory located: {$out}");
         }
         if (!is_file($file)) {
-            $this->out(
-                self::STATUS_FAIL . "Source file '{$file}' not found.");
+            $this->getOutputter()->stdout("Source file '{$file}' not found.", Outputter::STATUS_FAIL);
             $proceed = false;
         } else {
-            $this->out(self::STATUS_OK . "Source file located: {$file}");
+            $this->getOutputter()->stdout("Source file located: {$file}");
         }
 
         if ($proceed === false) {
-            $this->out($this->getFooter());
+            $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
             return;
         }
 
@@ -93,7 +91,7 @@ class Single
             ->setOutputter($this->getOutputter())
             ->compile();
 
-        $this->out($this->getFooter());
+        $this->getOutputter()->stdout($this->getFooter());
 
         ob_end_clean();
     }

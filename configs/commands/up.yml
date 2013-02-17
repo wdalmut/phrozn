@@ -1,8 +1,8 @@
 # phr up
 ---
 command:
-    name: &name up
-    aliases: [build, update]
+    name: &name update
+    aliases: [build, up]
     description: &desc Phrozn usage manual
     options:
         regen:

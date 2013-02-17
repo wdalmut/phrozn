@@ -21,7 +21,8 @@
 namespace Phrozn\Runner\CommandLine\Callback;
 use Phrozn\Outputter\Console\Color,
     Symfony\Component\Yaml\Yaml,
-    Phrozn\Runner\CommandLine;
+    Phrozn\Runner\CommandLine,
+    Phrozn\Outputter;
 
 /**
  * phrozn clobber command
@@ -44,8 +45,8 @@ class Clobber
         try {
             $this->purgeProject();
         } catch (\Exception $e) {
-            $this->out(self::STATUS_FAIL . $e->getMessage());
-            $this->out($this->getFooter());
+            $this->getOutputter()->stdout($e->getMessage(), Outputter::STATUS_FAIL);
+            $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
         }
     }
 
@@ -63,23 +64,39 @@ class Clobber
 
         $path .= '/.phrozn/'; // where to find skeleton
 
-        $this->out($this->getHeader());
-        $this->out("Purging project data..");
-        $this->out("\nLocated project folder: {$path}");
-        $this->out(
-            "Project folder is to be removed.\n" .
-            "This operation %rCAN NOT%n be undone.\n");
+        $this->getOutputter()->stdout($this->getHeader(), Outputter::STATUS_CLEAR);
+        $this->getOutputter()->stdout("Purging project data..");
+        $this->getOutputter()->stdout("Located project folder: {$path}");
+        $this->getOutputter()->stdout("Project folder is to be removed.", Outputter::STATUS_WARN);
+        $this->getOutputter()->stdout("This operation %rCAN NOT%n be undone." . PHP_EOL, Outputter::STATUS_WARN);
 
         if (is_dir($path) === false) {
             throw new \RuntimeException("No project found at {$path}");
         }
 
         if ($this->readLine() === 'yes') {
-            `rm -rf $path`;
-            $this->out(self::STATUS_DELETED . " {$path}");
+            $this->removePath($path);
+            rmdir($path);
+            $this->getOutputter()->stdout(" Remove project folder: {$path}", Outputter::STATUS_DELETED);
         } else {
-            $this->out(self::STATUS_FAIL . " Aborted..");
+            $this->getOutputter()->stdout(" Aborted..", Outputter::STATUS_FAIL);
         }
-        $this->out($this->getFooter());
+        $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
+    }
+
+    private function removePath($path)
+    {
+        $directory = new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS);
+
+        foreach ($directory as $file) {
+            if ($file->isDir()) {
+                $this->removePath($file->getPathname());
+                rmdir($file);
+                $this->getOutputter()->stdout(" Remove folder: {$file->getPathname()}", Outputter::STATUS_DELETED);
+            } else {
+                unlink($file->getPathname());
+                $this->getOutputter()->stdout(" Remove file: {$file->getPathname()}", Outputter::STATUS_DELETED);
+            }
+        }
     }
 }

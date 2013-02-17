@@ -41,7 +41,13 @@ class DefaultOutputter
      */
     public function stdout($msg, $status = self::STATUS_OK)
     {
-        $msg = Color::convert($status . $msg . "\n");
+        $msg = $status . $msg;
+        $msg = Color::convert($msg);
+        if ($this->useAnsiColors() === false) {
+            $msg = Color::strip($msg);
+        }
+        $msg .= PHP_EOL;
+
         if (defined('STDOUT')) {
             fwrite(STDOUT, $msg);
         } else {
@@ -63,7 +69,13 @@ class DefaultOutputter
      */
     public function stderr($msg, $status = self::STATUS_FAIL)
     {
-        $msg = Color::convert($status . $msg . "\n");
+        $msg = $status . $msg;
+        $msg = Color::convert($msg);
+        if ($this->useAnsiColors() === false) {
+            $msg = Color::strip($msg);
+        }
+        $msg .= PHP_EOL;
+
         if (defined('STDERR')) {
             fwrite(STDERR, $msg);
         } else {
@@ -74,4 +86,10 @@ class DefaultOutputter
         }
         return $this;
     }
+
+    private function useAnsiColors()
+    {
+        return (function_exists('posix_isatty') && @posix_isatty(STDOUT)) ? true : false;
+    }
 }
+

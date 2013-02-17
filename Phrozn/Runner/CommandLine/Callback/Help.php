@@ -21,7 +21,8 @@
 namespace Phrozn\Runner\CommandLine\Callback;
 use Phrozn\Outputter\Console\Color,
     Symfony\Component\Yaml\Yaml,
-    Phrozn\Runner\CommandLine;
+    Phrozn\Runner\CommandLine,
+    Phrozn\Outputter;
 
 /**
  * Extended help messages
@@ -51,9 +52,9 @@ class Help
             $out = $this->getTopicHelp($topic);
         }
 
-        $this->out($this->getHeader());
-        $this->out($out);
-        $this->out($this->getFooter());
+        $this->getOutputter()->stdout($this->getHeader(), Outputter::STATUS_CLEAR);
+        $this->getOutputter()->stdout($out, Outputter::STATUS_CLEAR);
+        $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
     }
 
     private function getTopicHelp($topic)

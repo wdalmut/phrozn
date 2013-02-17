@@ -36,6 +36,8 @@ interface Outputter
     const STATUS_ADDED      = '  [%gADDED%n]   ';
     const STATUS_DELETED    = '  [%gDELETED%n] ';
     const STATUS_OK         = '  [%gOK%n]      ';
+    const STATUS_WARN       = '  [%gWARN%n]    ';
+    const STATUS_CLEAR      = '';
 
     /**
      * Processes the output for a message that should be displayed on STDOUT.

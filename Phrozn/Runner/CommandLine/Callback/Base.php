@@ -37,18 +37,6 @@ use Phrozn\Runner\CommandLine,
 abstract class Base
     implements CommandLine\Callback
 {
-    /**
-     * Status constants
-     */
-    const STATUS_FAIL       = '  [%rFAIL%n]    ';
-    const STATUS_ADDED      = '  [%gADDED%n]   ';
-    const STATUS_DELETED    = '  [%gDELETED%n] ';
-    const STATUS_OK         = '  [%gOK%n]      ';
-
-    /**
-     * Whether to spice output with ANSI colors
-     */
-    private $useAnsiColors;
 
     /**
      * @var \Console_CommandLine_Outputter
@@ -148,25 +136,6 @@ abstract class Base
     public function getConfig()
     {
         return $this->config;
-    }
-
-    /**
-     * Output string to stdout (flushes output). Wrapper around Outputter
-     *
-     * @param string $str String to output
-     *
-     * @return \Phrozn\Runner\CommandLine\Callback
-     */
-    public function out($str)
-    {
-        $str = Color::convert($str);
-        if ($this->useAnsiColors() === false) {
-            $str = Color::strip($str);
-        }
-        $this->getOutputter()->stdout($str, '');
-        if (count(\ob_get_status()) !== 0) {
-            ob_flush();
-        }
     }
 
     /**
@@ -382,16 +351,6 @@ abstract class Base
         }
 
         return $path;
-    }
-
-    private function useAnsiColors()
-    {
-        if (null === $this->useAnsiColors) {
-            $config = $this->getConfig();
-            $meta = Yaml::parse($config['paths']['configs'] . 'phrozn.yml');
-            $this->useAnsiColors = (bool)$meta['use_ansi_colors'];
-        }
-        return $this->useAnsiColors;
     }
 
     private function getCommandMeta()

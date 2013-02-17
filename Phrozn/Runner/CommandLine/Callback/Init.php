@@ -21,7 +21,8 @@
 namespace Phrozn\Runner\CommandLine\Callback;
 use Console_Color as Color,
     Symfony\Component\Yaml\Yaml,
-    Phrozn\Runner\CommandLine;
+    Phrozn\Runner\CommandLine,
+    Phrozn\Outputter;
 
 /**
  * phrozn init command
@@ -59,18 +60,18 @@ class Init
         $path .= '/.phrozn/'; // where to copy skeleton
 
         ob_start();
-        $this->out($this->getHeader());
-        $this->out("Initializing new project");
-        $this->out("\n  Project path: {$path}");
+        $this->getOutputter()->stdout($this->getHeader(), Outputter::STATUS_CLEAR);
+        $this->getOutputter()->stdout("Initializing new project");
+        $this->getOutputter()->stdout("Project path: {$path}", Outputter::STATUS_ADDED);
 
         if (is_dir($path)) {
-            $this->out(self::STATUS_FAIL . "Project directory '.phrozn' already exists..");
-            $this->out($this->pad(self::STATUS_FAIL) . "Type 'phrozn help clobber' to get help on removing existing project.");
-            return $this->out($this->getFooter());
+            $this->getOutputter()->stdout("Project directory '.phrozn' already exists..", Outputter::STATUS_FAIL);
+            $this->getOutputter()->stdout("Type 'phrozn help clobber' to get help on removing existing project.", $this->pad(Outputter::STATUS_FAIL));
+            return $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
         } else {
             if (!@mkdir($path)) {
-                $this->out(self::STATUS_FAIL . "Error creating project directory..");
-                return $this->out($this->getFooter());
+                $this->getOutputter()->stdout("Error creating project directory..", Outputter::STATUS_FAIL);
+                return $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
             }
         }
 
@@ -80,13 +81,13 @@ class Init
             $destPath = str_replace('//', '/', $destPath);
             $destPath = str_replace($path, '', $destPath);
             if ($status) {
-                $that->out(Base::STATUS_ADDED . "{$destPath}");
+                $that->getOutputter()->stdout("{$destPath}", Outputter::STATUS_ADDED);
             } else {
-                $that->out(Base::STATUS_FAIL . "{$destPath}");
+                $that->getOutputter()->stdout("{$destPath}", Outputter::STATUS_FAIL);
             }
         });
 
-        return $this->out($this->getFooter());
+        return $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
     }
 
     /**

@@ -58,6 +58,7 @@ class TestOutputter
      */
     public function stdout($msg, $status = self::STATUS_OK)
     {
+        $msg = $status . $msg;
         if (defined('STDOUT')) {
             fwrite(STDOUT, $msg);
         } else {
@@ -77,6 +78,7 @@ class TestOutputter
      */
     public function stderr($msg, $status = self::STATUS_FAIL)
     {
+        $msg = $status . $msg;
         if (defined('STDERR')) {
             fwrite(STDERR, $msg);
         } else {

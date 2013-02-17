@@ -22,7 +22,8 @@ namespace Phrozn\Runner\CommandLine\Callback;
 use Phrozn\Outputter\Console\Color,
     Symfony\Component\Yaml\Yaml,
     Phrozn\Runner\CommandLine,
-    Phrozn\Site\DefaultSite as Site;
+    Phrozn\Site\DefaultSite as Site,
+    Phrozn\Outputter;
 
 /**
  * phrozn up command
@@ -45,8 +46,8 @@ class Up
         try {
             $this->updateProject();
         } catch (\Exception $e) {
-            $this->out(self::STATUS_FAIL . $e->getMessage());
-            $this->out($this->getFooter());
+            $this->getOutputter()->stdout($e->getMessage(), Outputter::STATUS_FAIL);
+            $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
         }
     }
 
@@ -55,27 +56,25 @@ class Up
         list($in, $out) = $this->getPaths();
 
         ob_start();
-        $this->out($this->getHeader());
-        $this->out("Starting static site compilation.\n");
+        $this->getOutputter()->stdout($this->getHeader(), Outputter::STATUS_CLEAR);
+        $this->getOutputter()->stdout("Starting static site compilation.");
 
         $proceed = true;
         if (!is_dir($in)) {
-            $this->out(
-                self::STATUS_FAIL . "Source directory '{$in}' not found.");
+            $this->getOutputter()->stdout("Source directory '{$in}' not found.", Outputter::STATUS_FAIL);
             $proceed = false;
         } else {
-            $this->out(self::STATUS_OK . "Source directory located: {$in}");
+            $this->getOutputter()->stdout("Source directory located: {$in}");
         }
         if (!is_dir($out)) {
-            $this->out(
-                self::STATUS_FAIL . "Destination directory '{$out}' not found.");
+            $this->getOutputter()->stdout("Destination directory '{$out}' not found.", Outputter::STATUS_FAIL);
             $proceed = false;
         } else {
-            $this->out(self::STATUS_OK . "Destination directory located: {$out}");
+            $this->getOutputter()->stdout("Destination directory located: {$out}");
         }
 
         if ($proceed === false) {
-            $this->out($this->getFooter());
+            $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
             return;
         }
 
@@ -84,7 +83,7 @@ class Up
             ->setOutputter($this->getOutputter())
             ->compile();
 
-        $this->out($this->getFooter());
+        $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
 
         ob_end_clean();
     }

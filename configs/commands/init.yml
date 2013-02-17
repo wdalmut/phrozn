@@ -1,8 +1,8 @@
 # phr init
 ---
 command:
-    name: &name init
-    aliases: [initialize]
+    name: &name initialize
+    aliases: [init]
     description: &desc Initialize Phrozn project
     options:
         verbose:

@@ -25,7 +25,8 @@ use Phrozn\Runner\CommandLine,
     Phrozn\Path\Project as ProjectPath,
     Symfony\Component\Yaml\Yaml,
     Console_Table as ConsoleTable,
-    Phrozn\Bundle\Service as BundleService;
+    Phrozn\Bundle\Service as BundleService,
+    Phrozn\Outputter;
 
 /**
  * phrozn bundle command
@@ -64,9 +65,9 @@ class Bundle
     public function execute()
     {
         if (false === $this->getCommand()) {
-            $this->out($this->getHeader());
-            $this->out(self::STATUS_FAIL . "No sub-command specified. Use 'phr ? bundle' for more info.");
-            $this->out($this->getFooter());
+            $this->getOutputter()->stdout($this->getHeader(), Outputter::STATUS_CLEAR);
+            $this->getOutputter()->stdout("No sub-command specified. Use 'phr ? bundle' for more info.", Outputter::STATUS_FAIL);
+            $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
         }
 
         // setup service
@@ -77,13 +78,13 @@ class Bundle
         if (isset($this->getParseResult()->command->command_name)) {
             $command = $this->getParseResult()->command->command_name;
             if (in_array($command, $this->availableCommands)) {
-                $this->out($this->getHeader());
+                $this->getOutputter()->stdout($this->getHeader(), Outputter::STATUS_CLEAR);
                 try {
                     $this->{'exec' . ucfirst($command)}();
                 } catch (\Exception $e) {
-                    $this->out(self::STATUS_FAIL . $e->getMessage());
+                    $this->getOutputter()->stdout($e->getMessage(), Outputter::STATUS_FAIL);
                 }
-                $this->out($this->getFooter());
+                $this->getOutputter()->stdout($this->getFooter(), Outputter::STATUS_CLEAR);
             }
         }
     }
@@ -119,7 +120,7 @@ class Bundle
             ->getBundles(
                 $this->getTypeParam(), $this->getBundleParam());
 
-        $this->out("Located project folder: {$path->get()}\n");
+        $this->getOutputter()->stdout("Located project folder: {$path->get()}\n");
         if (is_dir($path->get()) === false) {
             throw new \RuntimeException("No project found at {$pathArg}");
         }
@@ -143,10 +144,10 @@ class Bundle
         if (strlen($que)) { // hi-light search results
             $callback = array($this, 'highlightSearchTerm');
             $tbl->addFilter(1, $callback);
-            $this->out(sprintf("Search bundles having \"%s\"..", $que));
+            $this->getOutputter()->stdout(sprintf("Search bundles having \"%s\"..", $que));
         }
         $tbl->setAlign(3, CONSOLE_TABLE_ALIGN_CENTER);
-        $this->out($tbl->getTable()) ;
+        $this->getOutputter()->stdout($tbl->getTable()) ;
     }
 
     /**
@@ -169,7 +170,7 @@ class Bundle
                 ));
             }
         }
-        $this->out($tbl->getTable());
+        $this->getOutputter()->stdout($tbl->getTable());
     }
 
     /**
@@ -188,28 +189,28 @@ class Bundle
             throw new \RuntimeException('Invalid or empty bundle');
         }
 
-        $this->out("Located project folder: {$path->get()}\n");
+        $this->getOutputter()->stdout("Located project folder: {$path->get()}\n");
         if (is_dir($path->get()) === false) {
             throw new \RuntimeException("No project found at {$pathArg}");
         }
 
-        $this->out('Bundle content:');
+        $this->getOutputter()->stdout('Bundle content:');
         foreach ($files as $file) {
             // Archive_Tar defines dir as typeflag 5
             if(in_array($file['typeflag'], array(5)) === false) {
-                $this->out('    ' . $file['filename']);
+                $this->getOutputter()->stdout('    ' . $file['filename']);
             }
         }
 
-        $this->out("\nDo you wish to install this bundle?");
+        $this->getOutputter()->stdout("\nDo you wish to install this bundle?");
         if ($this->readLine() === 'yes') {
             $this
                 ->service
                 ->setProjectPath($path)
                 ->applyBundle($bundle);
-            $this->out(self::STATUS_OK . " Done..");
+            $this->getOutputter()->stdout(" Done..");
         } else {
-            $this->out(self::STATUS_FAIL . " Aborted..");
+            $this->getOutputter()->stdout(" Aborted..", Outputter::STATUS_FAIL);
         }
     }
 
@@ -226,20 +227,20 @@ class Bundle
 
         $files = $this->service->getBundleFiles($bundle);
 
-        $this->out("Located project folder: {$path->get()}\n");
+        $this->getOutputter()->stdout("Located project folder: {$path->get()}\n");
         if (is_dir($path->get()) === false) {
             throw new \RuntimeException("No project found at {$pathArg}");
         }
 
-        $this->out('Bundle content:');
+        $this->getOutputter()->stdout('Bundle content:');
         foreach ($files as $file) {
             // Archive_Tar defines dir as typeflag 5
             if(in_array($file['typeflag'], array(5)) === false) {
-                $this->out('    ' . $file['filename']);
+                $this->getOutputter()->stdout('    ' . $file['filename']);
             }
         }
 
-        $this->out(
+        $this->getOutputter()->stdout(
             "\nBundle files are to be removed.\n" .
             "This operation %rCAN NOT%n be undone.\n");
         if ($this->readLine() === 'yes') {
@@ -247,9 +248,9 @@ class Bundle
                 ->service
                 ->setProjectPath($path)
                 ->clobberBundle($bundle);
-            $this->out(self::STATUS_OK . " Done..");
+            $this->getOutputter()->stdout(" Done..");
         } else {
-            $this->out(self::STATUS_FAIL . " Aborted..");
+            $this->getOutputter()->stdout(" Aborted..", Outputter::STATUS_FAIL);
         }
     }
 
