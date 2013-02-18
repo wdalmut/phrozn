@@ -51,9 +51,22 @@ class Up
         }
     }
 
+    private function autoloadPlugins($plugins)
+    {
+        $loader = \Phrozn\Autoloader::getInstance()->getLoader();
+
+        $plugins .= '/plugins/';
+        if (is_dir($plugins)) {
+            $loader->add('PhroznPlugin', $plugins);
+        }
+
+    }
+
     private function updateProject()
     {
         list($in, $out) = $this->getPaths();
+
+        $this->autoloadPlugins($in);
 
         ob_start();
         $this->getOutputter()->stdout($this->getHeader(), Outputter::STATUS_CLEAR);
@@ -95,7 +108,7 @@ class Up
         $in  = $this->getPathArgument('in');
         $out = $this->getPathArgument('out');
 
-        if (strpos($in, '.phrozn') === false) {
+        if (file_exists($in . DIRECTORY_SEPARATOR . '/.phrozn')) {
             return array(
                 $in . '/.phrozn/',
                 $out . '/'
@@ -103,7 +116,7 @@ class Up
         } else {
             return array(
                 $in . '/',
-                $out . '/../'
+                $out . '/'
             );
         }
     }
