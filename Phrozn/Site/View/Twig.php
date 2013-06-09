@@ -90,7 +90,7 @@ class Twig
         $view = parent::render($vars);
         if ($this->hasLayout()) {
             // inject global site and front matter options into template
-            $vars = array_merge($vars, $this->getParams());
+            $vars = array_merge_recursive($vars, $this->getParams());
             $view = $this->applyLayout($view, $vars);
         }
         return $view;
@@ -103,7 +103,11 @@ class Twig
      */
     public function getOutputFile()
     {
-        $path = new OutputFile($this);
-        return $path->get();
+        if (!$this->outputFile) {
+            $path = new OutputFile($this);
+            $this->setOutputFile($path->get());
+        }
+
+        return $this->outputFile;
     }
 }

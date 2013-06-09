@@ -43,7 +43,8 @@ class Plain
         if ($permalink === null) {
             return rtrim($this->getView()->getOutputDir(), '/')
                 . '/'
-                . ltrim($this->getRelativeFile('entries', false), '/');
+                . ltrim($this->getRelativeFile('entries', false), '/')
+                . $this->getInputFileExtension();
         }
 
         $class = 'Phrozn\\Site\\View\\OutputPath\\Entry\\' . ucfirst($permalink);
@@ -52,6 +53,7 @@ class Plain
         }
 
         $object = new $class($this->getView());
-        return rtrim($object->get(), '.html');
+        return preg_replace("/\.html?/", "", $object->get());
+
     }
 }
